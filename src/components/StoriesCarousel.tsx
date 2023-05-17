@@ -50,7 +50,7 @@ const StoriesCarousel: React.FC = () => {
         <Box
           cursor="pointer"
           position="absolute"
-          top="20%"
+          top="30%"
           zIndex={5}
           left={0}
           translateY="-50%"
@@ -67,7 +67,7 @@ const StoriesCarousel: React.FC = () => {
           zIndex={5}
           position="absolute"
           p={2}
-          top="20%"
+          top="30%"
           right="0%"
           translateY="-50%"
           _hover={{ bg: "gray.200" }}
@@ -79,9 +79,13 @@ const StoriesCarousel: React.FC = () => {
         </Box>
       </Flex>
       <Box
+        border="1px"
+        borderColor="gray.200"
+        shadow="lg"
         className="scrollbar-hide"
         scrollBehavior="smooth"
         maxWidth="1200px"
+        py="2"
         px="10"
         ref={carouselRef}
         display="flex"
@@ -104,10 +108,10 @@ const StoriesCarousel: React.FC = () => {
             />
             <Text
               className="select-none cursor-text"
-              maxW="100px"
+              maxW="80px"
               isTruncated
               mt={2}
-              fontSize="sm"
+              fontSize="xs"
               fontWeight="light">
               {story.username}
             </Text>
