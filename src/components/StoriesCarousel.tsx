@@ -84,7 +84,7 @@ const StoriesCarousel: React.FC = () => {
         shadow="lg"
         className="scrollbar-hide"
         scrollBehavior="smooth"
-        maxWidth="1200px"
+        maxWidth="800px"
         py="2"
         px="10"
         ref={carouselRef}
@@ -100,12 +100,14 @@ const StoriesCarousel: React.FC = () => {
             align="center"
             justify="center"
             px={2}>
-            <Avatar
-              className="border-2 border-orange-500 hover:scale-110 transition-all cursor-pointer"
-              size="lg"
-              name={story.username}
-              src={story.avatar}
-            />
+            <div className="w-18 h-18 rounded-full  relative border-2 border-blue-400">
+              <Avatar
+                className="relative hover:scale-110 transition-all cursor-pointer"
+                size="lg"
+                name={story.username}
+                src={story.avatar}
+              />
+            </div>
             <Text
               className="select-none cursor-text"
               maxW="80px"
