@@ -122,7 +122,7 @@ const InstagramLogout = () => {
         transform="translateY(-50%)">
         <Button
           onClick={async () => {
-            await addDocumentToCollection("test", { test: "test" });
+            /*  await addDocumentToCollection("test", { test: "test" }); */
           }}
           variant="link">
           TEST
