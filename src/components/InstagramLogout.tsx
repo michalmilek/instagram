@@ -23,28 +23,35 @@ import {
   addDoc,
   DocumentData,
   CollectionReference,
+  doc,
+  getDoc,
 } from "firebase/firestore";
+import { useQuery } from "@tanstack/react-query";
+import { getUserByUID } from "@/services/firebaseMethods";
+import { UserData } from "@/types";
 
-const InstagramLogout = () => {
+const InstagramLogout = ({
+  handleRefetchPosts,
+}: {
+  handleRefetchPosts: () => void;
+}) => {
   const toast = useToast();
   //@ts-ignore
   const { currentUser } = useContext(AuthContext);
 
-  const addDocumentToCollection = async (
-    collectionName: string,
-    documentData: DocumentData
-  ): Promise<void> => {
-    try {
-      const collectionRef: CollectionReference<DocumentData> = collection(
-        db,
-        collectionName
-      );
-      const docRef = await addDoc(collectionRef, documentData);
-      console.log("Document added with ID:", docRef.id);
-    } catch (error) {
-      console.error("Error adding document:", error);
-    }
-  };
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = useQuery(["user", currentUser.uid], () => getUserByUID(currentUser.uid));
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error occurred while fetching user data.</div>;
+  }
 
   const renderSuggestedFriends = () => {
     return Array.from({ length: 5 }).map((_, index) => (
@@ -120,14 +127,7 @@ const InstagramLogout = () => {
         top="50%"
         right="0"
         transform="translateY(-50%)">
-        <Button
-          onClick={async () => {
-            /*  await addDocumentToCollection("test", { test: "test" }); */
-          }}
-          variant="link">
-          TEST
-        </Button>
-        <UploadPost />
+        <UploadPost handleRefetchPosts={handleRefetchPosts} />
         <Box
           display="flex"
           gap={4}
@@ -136,11 +136,7 @@ const InstagramLogout = () => {
           <Avatar
             size="sm"
             name={currentUser.email}
-            src={
-              currentUser?.photoURL
-                ? currentUser?.photoURL
-                : faker.image.avatar()
-            }
+            src={(userData as UserData).profileAvatar}
           />
           <Text ml={2}>{currentUser.email}</Text>
           <Button

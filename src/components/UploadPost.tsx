@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import {
   Box,
   Button,
@@ -25,6 +25,10 @@ import { storage, db } from "../firebase/firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as Yup from "yup";
 import { addDoc, collection } from "firebase/firestore";
+import { AuthContext } from "@/firebase/AuthContext";
+import { getAllPosts, getUserByUID } from "@/services/firebaseMethods";
+import { useQuery } from "@tanstack/react-query";
+import { UserData } from "@/types";
 
 interface FormData {
   description: string;
@@ -39,8 +43,14 @@ const schema = Yup.object().shape({
   }),
 });
 
-const UploadPost = () => {
+const UploadPost = ({
+  handleRefetchPosts,
+}: {
+  handleRefetchPosts: () => void;
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  //@ts-ignore
+  const { currentUser } = useContext(AuthContext);
   const {
     handleSubmit,
     control,
@@ -60,6 +70,20 @@ const UploadPost = () => {
     }
   };
 
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = useQuery(["user", currentUser.uid], () => getUserByUID(currentUser.uid));
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error occurred while fetching user data.</div>;
+  }
+
   const onSubmit = async (data: FormData) => {
     try {
       setUploading(true);
@@ -76,6 +100,9 @@ const UploadPost = () => {
         await addDoc(collection(db, "posts"), {
           description: data.description,
           imageURL: await getDownloadURL(fileRef),
+          user_uid: (userData as UserData).uid,
+          username: (userData as UserData).username,
+          profileAvatar: (userData as UserData).profileAvatar,
         });
         console.log("Post created!");
       }
@@ -88,6 +115,7 @@ const UploadPost = () => {
       console.error("Error uploading post:", error);
     } finally {
       setUploading(false);
+      handleRefetchPosts();
     }
   };
 
