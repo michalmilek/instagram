@@ -12,11 +12,11 @@ import * as firebase from "firebase/app";
 import "@firebase/firestore";
 import { collection, doc, getDoc, setDoc } from "@firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
-import { Button } from "@chakra-ui/react";
+import { Box, Button, useBreakpointValue } from "@chakra-ui/react";
 import ChooseUsername from "@/components/ChooseUsername";
 import { useQuery } from "@tanstack/react-query";
 import { getAllPosts } from "@/services/firebaseMethods";
-import { PostData } from "@/types";
+import { Post as PostInterface, PostData } from "@/types";
 
 interface User {
   uid: string;
@@ -30,12 +30,27 @@ export default function Home() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const sidebarWidth = useBreakpointValue({
+    base: "100px",
+    md: "120px",
+    lg: "180px",
+    xl: "200px",
+  });
+
+  const logoutWidth = useBreakpointValue({
+    base: "100px",
+    md: "150px",
+    lg: "200px",
+    xl: "400px",
+  });
+
   const {
     data: postsData,
     isLoading,
     isError,
     refetch: refetchPosts,
   } = useQuery(["posts"], () => getAllPosts());
+  console.log(postsData);
 
   const handleRefetchPosts = () => {
     refetchPosts();
@@ -48,7 +63,6 @@ export default function Home() {
   const closeModal = () => {
     setIsModalOpen(false);
   };
-  console.log(currentUser.uid);
 
   if (!currentUser) {
     router.push("/login");
@@ -79,17 +93,20 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="flex items-center">
         <Sidebar />
-        <div className="ml-[250px] mr-[400px] flex flex-col items-center gap-10">
+        <Box
+          marginLeft={sidebarWidth}
+          marginRight={logoutWidth}
+          className="flex flex-col items-center gap-10">
           <StoriesCarousel />
           <div className="flex flex-col gap-6">
-            {(postsData as PostData[])?.map((post) => (
+            {(postsData as PostInterface[])?.map((post) => (
               <Post
                 post={post}
                 key={post.id}
               />
             ))}
           </div>
-        </div>
+        </Box>
         <InstagramLogout handleRefetchPosts={handleRefetchPosts} />
       </div>
       <ChooseUsername

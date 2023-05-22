@@ -1,5 +1,14 @@
 "use client";
-import { Box, Flex, Button, Text, VStack } from "@chakra-ui/react";
+
+import {
+  Box,
+  Flex,
+  IconButton,
+  Text,
+  VStack,
+  useBreakpointValue,
+  Button,
+} from "@chakra-ui/react";
 import { IconType } from "react-icons";
 import {
   FiHome,
@@ -28,13 +37,25 @@ const sidebarButtons: SidebarButton[] = [
 ];
 
 const Sidebar = () => {
+  const showText = useBreakpointValue(
+    { base: false, lg: true },
+    { ssr: false }
+  );
+
+  const sidebarWidth = useBreakpointValue({
+    base: "100px",
+    md: "120px",
+    lg: "180px",
+    xl: "200px",
+  });
+
   return (
     <Box
       borderRight="2px"
       pos="fixed"
       top="0"
       left={0}
-      w="250px"
+      w={sidebarWidth}
       h="100vh"
       bg="gray.200"
       py="4"
@@ -56,23 +77,25 @@ const Sidebar = () => {
         align="start">
         {sidebarButtons.map((button) => (
           <Button
-            justifyContent="flex-start"
+            aria-label={button.label}
             key={button.label}
             leftIcon={<button.icon size="20" />}
             variant="ghost"
-            w="100%">
-            {button.label}
+            w="100%"
+            justifyContent="flex-start">
+            {showText && button.label}
           </Button>
         ))}
       </VStack>
       <Button
+        aria-label="More"
         mt="98%"
         size="lg"
         justifyContent="flex-start"
         leftIcon={<FiMoreHorizontal size="30" />}
         variant="ghost"
         w="100%">
-        More
+        {showText && "More"}
       </Button>
     </Box>
   );

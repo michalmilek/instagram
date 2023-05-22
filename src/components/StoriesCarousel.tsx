@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef } from "react";
-import { Box, Flex, Avatar, Text } from "@chakra-ui/react";
+import { Box, Flex, Avatar, Text, useBreakpointValue } from "@chakra-ui/react";
 import { faker } from "@faker-js/faker";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
@@ -40,6 +40,13 @@ const StoriesCarousel: React.FC = () => {
       });
     }
   };
+
+  const carouselWidth = useBreakpointValue({
+    base: "230px",
+    md: "400px",
+    lg: "600px",
+    xl: "800px",
+  });
 
   return (
     <Box position="relative">
@@ -84,7 +91,7 @@ const StoriesCarousel: React.FC = () => {
         shadow="lg"
         className="scrollbar-hide"
         scrollBehavior="smooth"
-        maxWidth="800px"
+        maxWidth={carouselWidth}
         py="2"
         px="10"
         ref={carouselRef}
@@ -103,14 +110,14 @@ const StoriesCarousel: React.FC = () => {
             <div className="w-18 h-18 rounded-full  relative border-2 border-blue-400">
               <Avatar
                 className="relative hover:scale-110 transition-all cursor-pointer"
-                size="lg"
+                size={{ base: "sm", lg: "lg" }}
                 name={story.username}
                 src={story.avatar}
               />
             </div>
             <Text
               className="select-none cursor-text"
-              maxW="80px"
+              maxW={{ base: "30px", lg: "80px" }}
               isTruncated
               mt={2}
               fontSize="xs"

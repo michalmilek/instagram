@@ -6,20 +6,28 @@ export interface UserData {
   uid: string;
 }
 
-export interface PostData {
+export interface Post {
+  user: {
+    uid: string;
+    profileAvatar: string;
+    username: string;
+  };
   description: string;
+  createdAt: Timestamp;
   imageURL: string;
-  profileAvatar: string;
-  username: string;
-  user_uid: string;
   id: string;
 }
 
+export interface CommentData {}
 export interface Comment {
   id: string;
-  user_uid: string;
   text: string;
-  username: string;
-  profileAvatar: string;
+  user: {
+    uid: string;
+    profileAvatar: string;
+    username: string;
+  };
   timestamp: Timestamp;
 }
+
+

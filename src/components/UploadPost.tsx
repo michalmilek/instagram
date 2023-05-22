@@ -24,7 +24,7 @@ import UploadFile from "@/services/UploadFile";
 import { storage, db } from "../firebase/firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as Yup from "yup";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
 import { AuthContext } from "@/firebase/AuthContext";
 import { getAllPosts, getUserByUID } from "@/services/firebaseMethods";
 import { useQuery } from "@tanstack/react-query";
@@ -93,6 +93,7 @@ const UploadPost = ({
       if (file) {
         const storageRef = ref(storage);
         const fileRef = ref(storageRef, file.name);
+        const userRef = doc(db, "users", currentUser.uid); // Referencja do dokumentu "users/user-id"
 
         await uploadBytes(fileRef, file);
         console.log("File uploaded!");
@@ -100,9 +101,8 @@ const UploadPost = ({
         await addDoc(collection(db, "posts"), {
           description: data.description,
           imageURL: await getDownloadURL(fileRef),
-          user_uid: (userData as UserData).uid,
-          username: (userData as UserData).username,
-          profileAvatar: (userData as UserData).profileAvatar,
+          user: userRef,
+          createdAt: serverTimestamp(),
         });
         console.log("Post created!");
       }

@@ -10,6 +10,7 @@ import {
   Avatar,
   Text,
   useToast,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { faker } from "@faker-js/faker";
@@ -39,6 +40,13 @@ const InstagramLogout = ({
   //@ts-ignore
   const { currentUser } = useContext(AuthContext);
 
+  const logoutWidth = useBreakpointValue({
+    base: "100px",
+    md: "150px",
+    lg: "250px",
+    xl: "340px",
+  });
+
   const {
     data: userData,
     isLoading,
@@ -57,20 +65,30 @@ const InstagramLogout = ({
     return Array.from({ length: 5 }).map((_, index) => (
       <Box
         key={index}
+        gap={{ base: 1, lg: 0 }}
         display="flex"
-        alignItems="center"
+        flexDirection={{ base: "column", lg: "row" }}
+        textAlign={{ base: "center", lg: "left" }}
+        alignItems={{ base: "center", md: "center" }}
         my={2}>
         <Avatar
           size="sm"
           name={faker.person.firstName()}
           src={faker.image.avatar()}
+          mr={{ base: 0, lg: 2 }}
+          mb={{ base: 2, lg: 0 }}
         />
         <Text
-          w={40}
-          ml={2}>
+          w={{ base: "100%", lg: "80px" }}
+          fontSize={{ base: "xs", md: "sm" }}
+          ml={{ base: 0, lg: 2 }}>
           {faker.person.firstName()}
         </Text>
-        <Button ml={4}>Follow</Button>
+        <Button
+          fontSize={{ base: "xs", md: "sm" }}
+          ml={{ base: 0, lg: 2 }}>
+          Follow
+        </Button>
       </Box>
     ));
   };
@@ -113,12 +131,14 @@ const InstagramLogout = ({
   };
   return (
     <Box
+      zIndex={9999}
       position="fixed"
-      w="400px"
+      w={logoutWidth}
       top="0"
       h="100vh"
       right="20px">
       <VStack
+        w={logoutWidth}
         spacing={4}
         bg="white"
         boxShadow="md"
@@ -132,13 +152,18 @@ const InstagramLogout = ({
           display="flex"
           gap={4}
           alignItems="center"
+          flexDirection={{ base: "column", xl: "row" }}
           my={2}>
           <Avatar
             size="sm"
             name={currentUser.email}
             src={(userData as UserData).profileAvatar}
           />
-          <Text ml={2}>{currentUser.email}</Text>
+          <Text
+            display={{ base: "none", lg: "block" }}
+            ml={2}>
+            {currentUser.email}
+          </Text>
           <Button
             variant="link"
             color="gray.500"

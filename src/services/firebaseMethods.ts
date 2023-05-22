@@ -4,13 +4,16 @@ import {
   collection,
   deleteDoc,
   doc,
+  DocumentReference,
   getDoc,
   getDocs,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
   Timestamp,
 } from "@firebase/firestore";
-import { Comment } from "@/types";
+import { Comment, UserData } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
 export const getUserByUID = async (uid: string) => {
@@ -27,31 +30,37 @@ export const getUserByUID = async (uid: string) => {
 
 export const getAllPosts = async () => {
   const postsCollectionRef = collection(db, "posts");
-  const querySnapshot = await getDocs(postsCollectionRef);
+  const q = query(postsCollectionRef, orderBy("createdAt", "desc"));
+  const querySnapshot = await getDocs(q);
 
-  const posts = querySnapshot.docs.map((doc) => {
+  const posts = [];
+  for (const doc of querySnapshot.docs) {
     const post = doc.data();
     const postId = doc.id;
-    return { ...post, id: postId };
-  });
+
+    const userRef = post.user; // Referencja do dokumentu użytkownika
+    const userSnapshot = await getDoc(userRef);
+    const userData = userSnapshot.data();
+
+    const postWithUserData = { ...post, id: postId, user: userData };
+    posts.push(postWithUserData);
+  }
 
   return posts;
 };
 
-interface CommentData {
-  text: string;
-  username: string;
-  user_uid: string;
-  profileAvatar: string;
-  timestamp?: Timestamp;
-}
-
-export const addComment = async (postId: string, commentData: CommentData) => {
+export const addComment = async (
+  postId: string,
+  commentData: string,
+  userId: string
+) => {
   const postRef = doc(db, "posts", postId);
   const commentsCollectionRef = collection(postRef, "comments");
+  const userRef = doc(db, "users", userId);
 
   const commentWithTimestamp = {
-    ...commentData,
+    text: commentData,
+    user: userRef as DocumentReference,
     timestamp: serverTimestamp(),
   };
 
@@ -63,12 +72,22 @@ export const getAllComments = async (postId: string) => {
   const commentsCollectionRef = collection(postRef, "comments");
   const querySnapshot = await getDocs(commentsCollectionRef);
 
-  const comments = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  const comments = querySnapshot.docs.map(async (doc) => {
+    const commentData = doc.data();
+    const userRef = commentData.user as DocumentReference;
+    const userSnapshot = await getDoc(userRef);
+    const userData = userSnapshot.data() as UserData;
 
-  const sortedComments = (comments as Comment[]).sort((a, b) => {
+    return {
+      id: doc.id,
+      ...commentData,
+      user: userData,
+    };
+  });
+
+  const sortedComments = await Promise.all(comments);
+
+  (sortedComments as Comment[]).sort((a, b) => {
     const dateA = (a.timestamp as Timestamp).toDate().getTime();
     const dateB = (b.timestamp as Timestamp).toDate().getTime();
 

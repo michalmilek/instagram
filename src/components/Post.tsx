@@ -27,6 +27,7 @@ import { serverTimestamp } from "@firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
 import { formatDistanceToNowStrict } from "date-fns";
 import { FiHeart, FiMessageCircle } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 const InstagramPost = ({ post }: { post: PostData }) => {
   //@ts-ignore
@@ -34,6 +35,7 @@ const InstagramPost = ({ post }: { post: PostData }) => {
   const [comment, setComment] = useState<string>("");
   const [isViewMore, setIsViewMore] = useState(false);
   const commentRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleCommentChange = (e: any) => {
     setComment(e.target.value);
@@ -76,18 +78,22 @@ const InstagramPost = ({ post }: { post: PostData }) => {
         align="center"
         p={4}>
         <Avatar
-          name={post.username}
-          src={post.profileAvatar}
+          name={post.user.username}
+          src={post.user.profileAvatar}
         />
         <Text
           ml={2}
           fontWeight="bold">
-          {post.username}
+          {post.user.username}
         </Text>
       </Flex>
       <Image
+        cursor="pointer"
         src={post.imageURL}
         alt="Post Image"
+        onClick={() => {
+          router.push(`/post/${post.id}`);
+        }}
       />
       <Flex p={4}>
         <Text>{post.description}</Text>
@@ -166,16 +172,19 @@ const InstagramPost = ({ post }: { post: PostData }) => {
                   alignItems="center">
                   <Avatar
                     size="sm"
-                    src={comment.profileAvatar}
+                    src={comment.user.profileAvatar}
                     marginRight="2"
                   />
                   <Box>
                     <Text
+                      fontSize={{ base: "xs", lg: "sm" }}
                       fontWeight="bold"
                       marginBottom="1">
-                      {comment.username}
+                      {comment.user.username}
                     </Text>
-                    <Text>{comment.text}</Text>
+                    <Text fontSize={{ base: "xs", lg: "sm" }}>
+                      {comment.text}
+                    </Text>
                   </Box>
                 </Box>
                 <Text
@@ -209,12 +218,7 @@ const InstagramPost = ({ post }: { post: PostData }) => {
         <Button
           mt={2}
           onClick={async () => {
-            await addComment(post.id, {
-              text: comment,
-              username: (userData as UserData).username,
-              user_uid: (userData as UserData).uid,
-              profileAvatar: (userData as UserData).profileAvatar,
-            });
+            await addComment(post.id, comment, currentUser.uid);
             setComment("");
 
             refetchComments();
