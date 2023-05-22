@@ -5,7 +5,7 @@ import StoriesCarousel from "@/components/StoriesCarousel";
 import Post from "@/components/Post";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "@/firebase/AuthContext";
 import InstagramLogout from "@/components/InstagramLogout";
 import * as firebase from "firebase/app";
@@ -16,7 +16,8 @@ import { Box, Button, useBreakpointValue } from "@chakra-ui/react";
 import ChooseUsername from "@/components/ChooseUsername";
 import { useQuery } from "@tanstack/react-query";
 import { getAllPosts } from "@/services/firebaseMethods";
-import { Post as PostInterface, PostData } from "@/types";
+import { Post as PostInterface } from "@/types";
+import PostModal from "@/components/PostModal";
 
 interface User {
   uid: string;
@@ -31,17 +32,16 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const sidebarWidth = useBreakpointValue({
-    base: "100px",
-    md: "120px",
+    base: "70px",
+    md: "80px",
     lg: "180px",
     xl: "200px",
   });
-
   const logoutWidth = useBreakpointValue({
-    base: "100px",
-    md: "150px",
+    base: "80px",
+    md: "100px",
     lg: "200px",
-    xl: "400px",
+    xl: "340px",
   });
 
   const {
@@ -50,7 +50,6 @@ export default function Home() {
     isError,
     refetch: refetchPosts,
   } = useQuery(["posts"], () => getAllPosts());
-  console.log(postsData);
 
   const handleRefetchPosts = () => {
     refetchPosts();
@@ -101,8 +100,8 @@ export default function Home() {
           <div className="flex flex-col gap-6">
             {(postsData as PostInterface[])?.map((post) => (
               <Post
-                post={post}
                 key={post.id}
+                post={post}
               />
             ))}
           </div>

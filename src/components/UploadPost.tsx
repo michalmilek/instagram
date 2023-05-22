@@ -122,6 +122,7 @@ const UploadPost = ({
   return (
     <>
       <Button
+        fontSize={{ base: "sm", lg: "md" }}
         className="bg-gray-300"
         variant="solid"
         onClick={onOpen}>

@@ -41,9 +41,9 @@ const InstagramLogout = ({
   const { currentUser } = useContext(AuthContext);
 
   const logoutWidth = useBreakpointValue({
-    base: "100px",
-    md: "150px",
-    lg: "250px",
+    base: "80px",
+    md: "100px",
+    lg: "200px",
     xl: "340px",
   });
 
@@ -131,7 +131,7 @@ const InstagramLogout = ({
   };
   return (
     <Box
-      zIndex={9999}
+      zIndex={2}
       position="fixed"
       w={logoutWidth}
       top="0"
@@ -175,7 +175,11 @@ const InstagramLogout = ({
           textAlign="center"
           py={2}
           borderBottomWidth="1px">
-          <Text fontWeight="bold">Suggested Friends</Text>
+          <Text
+            fontSize={{ base: "sm", lg: "md" }}
+            fontWeight="bold">
+            Suggested Friends
+          </Text>
         </Box>
         <VStack
           align="flex-start"

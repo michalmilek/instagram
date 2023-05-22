@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useContext, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Box,
   Flex,
@@ -11,7 +17,7 @@ import {
   Button,
   IconButton,
 } from "@chakra-ui/react";
-import { Comment, PostData, UserData } from "@/types";
+import { Comment, Post, UserData } from "@/types";
 import {
   addComment,
   addLike,
@@ -28,14 +34,57 @@ import { formatDistanceToNow } from "date-fns";
 import { formatDistanceToNowStrict } from "date-fns";
 import { FiHeart, FiMessageCircle } from "react-icons/fi";
 import { useRouter } from "next/navigation";
+import PostModal from "./PostModal";
 
-const InstagramPost = ({ post }: { post: PostData }) => {
+const InstagramPost = ({ post }: { post: Post }) => {
   //@ts-ignore
   const { currentUser } = useContext(AuthContext);
   const [comment, setComment] = useState<string>("");
   const [isViewMore, setIsViewMore] = useState(false);
   const commentRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
+  const handleRouteChange = useCallback(
+    (url: string) => {
+      if (url === "/post/modal") {
+        setIsPostModalOpen(true);
+      } else if (url === "/post") {
+        setIsPostModalOpen(false);
+        router.back();
+      }
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    const handlePopstate = () => {
+      if (window.location.pathname === `/post/${post.id}`) {
+        setIsPostModalOpen(true);
+      } else if (window.location.pathname === "/") {
+        setIsPostModalOpen(false);
+        window.history.back();
+      }
+    };
+
+    window.addEventListener("popstate", handlePopstate);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopstate);
+    };
+  }, [post.id]);
+
+  const handleOpenPostModal = () => {
+    setIsPostModalOpen(true);
+    const newUrl = `/post/${post.id}`;
+    window.history.pushState(null, "", newUrl);
+  };
+
+  const handleClosePostModal = () => {
+    setIsPostModalOpen(false);
+    const newUrl = "/";
+    window.history.pushState(null, "", newUrl);
+  };
 
   const handleCommentChange = (e: any) => {
     setComment(e.target.value);
@@ -59,7 +108,7 @@ const InstagramPost = ({ post }: { post: PostData }) => {
     currentUser.uid
   );
 
-  const { data: likesCount, refetch: refetchPostCount } = useLikesCount(
+  const { data: likesCount, refetch: refetchLikesCount } = useLikesCount(
     post.id
   );
 
@@ -78,10 +127,12 @@ const InstagramPost = ({ post }: { post: PostData }) => {
         align="center"
         p={4}>
         <Avatar
+          size={{ base: "sm", lg: "md" }}
           name={post.user.username}
           src={post.user.profileAvatar}
         />
         <Text
+          fontSize={{ base: "sm", lg: "md" }}
           ml={2}
           fontWeight="bold">
           {post.user.username}
@@ -91,18 +142,17 @@ const InstagramPost = ({ post }: { post: PostData }) => {
         cursor="pointer"
         src={post.imageURL}
         alt="Post Image"
-        onClick={() => {
-          router.push(`/post/${post.id}`);
-        }}
+        onClick={handleOpenPostModal}
       />
       <Flex p={4}>
-        <Text>{post.description}</Text>
+        <Text fontSize={{ base: "sm", lg: "md" }}>{post.description}</Text>
       </Flex>
       <Flex
         px={8}
         alignItems="center"
         mt={2}>
         <IconButton
+          zIndex={0}
           className={` ${
             isLiked
               ? "bg-red-500 text-white border-transparent border transition-all"
@@ -114,11 +164,11 @@ const InstagramPost = ({ post }: { post: PostData }) => {
             if (isLiked) {
               await removeLike(post.id, currentUser.uid);
               refetchisLiked();
-              refetchPostCount();
+              refetchLikesCount();
             } else {
               await addLike(post.id, currentUser.uid);
               refetchisLiked();
-              refetchPostCount();
+              refetchLikesCount();
             }
           }}
           size="sm"
@@ -129,7 +179,7 @@ const InstagramPost = ({ post }: { post: PostData }) => {
           onClick={() => {
             commentRef.current?.focus();
           }}
-          className="bg-blue-500"
+          className="bg-blue-500 z-0"
           aria-label="Comment"
           icon={<FiMessageCircle />}
           size="sm"
@@ -144,6 +194,7 @@ const InstagramPost = ({ post }: { post: PostData }) => {
       </Flex>
       <Box p={4}>
         <Text
+          fontSize={{ base: "sm", lg: "md" }}
           mb={8}
           fontWeight="bold">
           Comments:
@@ -189,7 +240,7 @@ const InstagramPost = ({ post }: { post: PostData }) => {
                 </Box>
                 <Text
                   pr={isViewMore ? 4 : 0}
-                  fontSize="sm"
+                  fontSize={{ base: "sm", lg: "md" }}
                   color="gray.500">
                   {timeAgo}
                 </Text>
@@ -210,12 +261,14 @@ const InstagramPost = ({ post }: { post: PostData }) => {
       )}
       <Box p={4}>
         <Input
+          fontSize={{ base: "sm", lg: "md" }}
           ref={commentRef}
           placeholder="Add a comment"
           value={comment}
           onChange={handleCommentChange}
         />
         <Button
+          fontSize={{ base: "sm", lg: "md" }}
           mt={2}
           onClick={async () => {
             await addComment(post.id, comment, currentUser.uid);
@@ -226,6 +279,17 @@ const InstagramPost = ({ post }: { post: PostData }) => {
           Add Comment
         </Button>
       </Box>
+      <PostModal
+        isLiked={isLiked}
+        refetchisLiked={refetchisLiked}
+        likesCount={likesCount}
+        commentsData={commentsData}
+        refetchComments={refetchComments}
+        refetchLikesCount={refetchLikesCount}
+        post={post}
+        isPostModalOpen={isPostModalOpen}
+        handleClosePostModal={handleClosePostModal}
+      />
     </Box>
   );
 };

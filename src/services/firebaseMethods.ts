@@ -12,6 +12,7 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  where,
 } from "@firebase/firestore";
 import { Comment, UserData } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -138,4 +139,14 @@ export const useIsUserLikedPost = (postId: string, userUid: string) => {
 
 export const useLikesCount = (postId: string) => {
   return useQuery(["likesCount", postId], () => getLikesCount(postId));
+};
+
+export const getUserByUsername = async (username: string) => {
+  const usersCollectionRef = collection(db, "users");
+  const querySnapshot = await getDocs(usersCollectionRef);
+  const users = querySnapshot.docs
+    .map((doc) => doc.data())
+    .filter((user) => user.username.includes(username));
+
+  return users;
 };
