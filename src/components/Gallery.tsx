@@ -2,6 +2,8 @@
 
 import { Post } from "@/types";
 import { Box, Image } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import GalleryImg from "./GalleryImg";
 
 const Gallery = ({ posts }: { posts: Post[] }) => {
   return (
@@ -11,12 +13,9 @@ const Gallery = ({ posts }: { posts: Post[] }) => {
       justifyContent="center"
       gap={4}>
       {posts.map((post) => (
-        <Image
+        <GalleryImg
           key={post.id}
-          src={post.imageURL}
-          alt={post.description}
-          boxSize="200px"
-          objectFit="cover"
+          post={post}
         />
       ))}
     </Box>

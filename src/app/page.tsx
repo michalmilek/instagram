@@ -89,29 +89,26 @@ export default function Home() {
     });
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="flex items-center">
-        <Sidebar />
-        <Box
-          marginLeft={sidebarWidth}
-          marginRight={logoutWidth}
-          className="flex flex-col items-center gap-10">
-          <StoriesCarousel />
-          <div className="flex flex-col gap-6">
-            {(postsData as PostInterface[])?.map((post) => (
-              <Post
-                key={post.id}
-                post={post}
-              />
-            ))}
-          </div>
-        </Box>
-        <InstagramLogout handleRefetchPosts={handleRefetchPosts} />
-      </div>
+    <div className="flex items-center">
+      <Box
+        marginLeft={sidebarWidth}
+        marginRight={logoutWidth}
+        className="flex flex-col items-center gap-10">
+        <StoriesCarousel />
+        <div className="flex flex-col gap-6">
+          {(postsData as PostInterface[])?.map((post) => (
+            <Post
+              key={post.id}
+              post={post}
+            />
+          ))}
+        </div>
+      </Box>
+      <InstagramLogout handleRefetchPosts={handleRefetchPosts} />
       <ChooseUsername
         isOpen={isModalOpen}
         onClose={closeModal}
       />
-    </main>
+    </div>
   );
 }

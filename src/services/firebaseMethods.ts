@@ -18,16 +18,20 @@ import {
 import { Comment, Post, PostWithUserReference, UserData } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
-export const getUserByUID = async (uid: string) => {
+export const getUserByUID = async (uid: string): Promise<UserData | null> => {
   const userDocRef = doc(collection(db, "users"), uid);
   const userDocSnapshot = await getDoc(userDocRef);
 
   if (userDocSnapshot.exists()) {
     const userData = userDocSnapshot.data();
-    return userData;
+    return userData as UserData;
   } else {
     return null;
   }
+};
+
+export const useUserByUID = (uid: string) => {
+  return useQuery(["user", uid], () => getUserByUID(uid));
 };
 
 export const getAllPosts = async () => {
@@ -81,7 +85,6 @@ export const useAllPostsByUserId = (userId: string) => {
   );
 };
 
-
 export const addComment = async (
   postId: string,
   commentData: string,
@@ -128,6 +131,10 @@ export const getAllComments = async (postId: string) => {
   });
 
   return sortedComments;
+};
+
+export const useComments = (postId: string) => {
+  return useQuery(["comments", postId], () => getAllComments(postId));
 };
 
 export const addLike = async (postId: string, userId: string) => {
@@ -183,25 +190,37 @@ export const getUserByUsername = async (username: string) => {
   return users;
 };
 
-
 export const getPostById = async (postId: string): Promise<Post | null> => {
   const postRef = doc(db, "posts", postId);
   const docSnapshot = await getDoc(postRef);
 
   if (docSnapshot.exists()) {
     const post = docSnapshot.data() as Post;
-    const user = post.user as UserData;
+    const userRef = post.user;
+    const userSnapshot = await getDoc(userRef as any);
 
-    const userData = {
-      uid: user.uid,
-      profileAvatar: user.profileAvatar,
-      username: user.username,
-    };
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data() as UserData;
 
-    const postWithUserData = { ...post, user: userData };
+      const postWithUserData = {
+        ...post,
+        user: {
+          uid: userData.uid,
+          profileAvatar: userData.profileAvatar,
+          username: userData.username,
+        },
+        id: postId,
+      };
 
-    return postWithUserData;
+      return postWithUserData;
+    }
   }
 
   return null;
+};
+
+export const usePostById = (postId: string) => {
+  return useQuery<Post | null, Error>(["post", postId], () =>
+    getPostById(postId)
+  );
 };

@@ -48,7 +48,7 @@ const Sidebar = () => {
   const router = useRouter();
 
   const sidebarButtons: SidebarButton[] = [
-    { label: "Home", icon: FiHome, onClick: () => router.push("/23") },
+    { label: "Home", icon: FiHome, onClick: () => router.push("/") },
     {
       label: "Search",
       icon: FiSearch,
