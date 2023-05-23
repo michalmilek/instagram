@@ -182,3 +182,26 @@ export const getUserByUsername = async (username: string) => {
 
   return users;
 };
+
+
+export const getPostById = async (postId: string): Promise<Post | null> => {
+  const postRef = doc(db, "posts", postId);
+  const docSnapshot = await getDoc(postRef);
+
+  if (docSnapshot.exists()) {
+    const post = docSnapshot.data() as Post;
+    const user = post.user as UserData;
+
+    const userData = {
+      uid: user.uid,
+      profileAvatar: user.profileAvatar,
+      username: user.username,
+    };
+
+    const postWithUserData = { ...post, user: userData };
+
+    return postWithUserData;
+  }
+
+  return null;
+};
