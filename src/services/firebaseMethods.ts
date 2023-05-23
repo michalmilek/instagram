@@ -2,6 +2,7 @@ import { db } from "@/firebase/firebaseConfig";
 import {
   addDoc,
   collection,
+  collectionGroup,
   deleteDoc,
   doc,
   DocumentReference,
@@ -14,7 +15,7 @@ import {
   Timestamp,
   where,
 } from "@firebase/firestore";
-import { Comment, UserData } from "@/types";
+import { Comment, Post, PostWithUserReference, UserData } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
 export const getUserByUID = async (uid: string) => {
@@ -49,6 +50,37 @@ export const getAllPosts = async () => {
 
   return posts;
 };
+
+export const getAllPostsByUserId = async (userId: string): Promise<Post[]> => {
+  const userRef = doc(db, "users", userId);
+  const q = query(
+    collection(db, "posts"),
+    where("user", "==", userRef),
+    orderBy("createdAt", "desc")
+  );
+  const querySnapshot = await getDocs(q);
+
+  const posts: Post[] = [];
+  for (const doc of querySnapshot.docs) {
+    const post = doc.data() as Post;
+    const postId = doc.id;
+
+    const userSnapshot = await getDoc(userRef);
+    const userData = userSnapshot.data() as UserData;
+
+    const postWithUserData = { ...post, id: postId, user: userData };
+    posts.push(postWithUserData);
+  }
+
+  return posts;
+};
+
+export const useAllPostsByUserId = (userId: string) => {
+  return useQuery<Post[], Error>(["posts", userId], () =>
+    getAllPostsByUserId(userId)
+  );
+};
+
 
 export const addComment = async (
   postId: string,

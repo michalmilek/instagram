@@ -1,4 +1,4 @@
-import { Timestamp } from "@firebase/firestore";
+import { DocumentReference, Timestamp } from "@firebase/firestore";
 
 export interface UserData {
   username: string;
@@ -17,6 +17,15 @@ export interface Post {
   imageURL: string;
   id: string;
 }
+
+export interface PostWithUserReference {
+  user: DocumentReference | undefined;
+  description: string;
+  createdAt: Timestamp;
+  imageURL: string;
+  id: string;
+}
+
 
 export interface CommentData {}
 export interface Comment {
