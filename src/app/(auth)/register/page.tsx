@@ -17,7 +17,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/firebaseConfig";
+import { app, auth } from "../../../firebase/firebaseConfig";
 import { useContext, useState } from "react";
 import { Link } from "@chakra-ui/next-js";
 import { useRouter } from "next/navigation";

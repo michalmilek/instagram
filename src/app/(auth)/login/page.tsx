@@ -5,7 +5,7 @@ import { Box, Button } from "@chakra-ui/react";
 import React, { useContext, useEffect } from "react";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { app, auth } from "../../firebase/firebaseConfig";
+import { app, auth } from "../../../firebase/firebaseConfig";
 import { AuthContext } from "@/firebase/AuthContext";
 import { User } from "firebase/auth";
 import { useRouter } from "next/navigation";
