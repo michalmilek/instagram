@@ -39,4 +39,10 @@ export interface Comment {
   timestamp: Timestamp;
 }
 
+export interface Notification {
+  postId: string;
+  seen: boolean;
+  timestamp: Timestamp;
+  userId: string;
+}
 

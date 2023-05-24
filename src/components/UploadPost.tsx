@@ -24,7 +24,13 @@ import UploadFile from "@/services/UploadFile";
 import { storage, db } from "../firebase/firebaseConfig";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as Yup from "yup";
-import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { AuthContext } from "@/firebase/AuthContext";
 import { getAllPosts, getUserByUID } from "@/services/firebaseMethods";
 import { useQuery } from "@tanstack/react-query";
@@ -98,13 +104,15 @@ const UploadPost = ({
         await uploadBytes(fileRef, file);
         console.log("File uploaded!");
         // Możesz wykonać dodatkowe operacje, jeśli potrzebujesz
-        await addDoc(collection(db, "posts"), {
+        const docRef = await addDoc(collection(db, "posts"), {
           description: data.description,
           imageURL: await getDownloadURL(fileRef),
           user: userRef,
           createdAt: serverTimestamp(),
         });
-        console.log("Post created!");
+
+        const postId = docRef.id;
+        await updateDoc(docRef, { postId });
       }
 
       // Simulate upload delay

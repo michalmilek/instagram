@@ -22,7 +22,7 @@ const LoginPage = () => {
 
   const handleLoginWithGoogle = async () => {
     try {
-      await googleSignIn();
+      await googleSignIn().then(() => router.push("/"));
     } catch (error) {
       console.log(error);
     }
@@ -31,6 +31,7 @@ const LoginPage = () => {
   const handleLoginWithFacebook = async () => {
     try {
       await facebookSignIn();
+      router.push("/");
     } catch (error) {
       console.log(error);
     }

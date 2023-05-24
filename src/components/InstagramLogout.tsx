@@ -99,6 +99,7 @@ const InstagramLogout = ({
         // Wylogowanie zakończone powodzeniem
         // Wyświetlanie alertu z informacją o wylogowaniu
         showAlert("Zostałeś wylogowany.", "success");
+        window.location.reload();
       })
       .catch((error) => {
         // Wystąpił błąd podczas wylogowywania
@@ -157,7 +158,7 @@ const InstagramLogout = ({
           <Avatar
             size="sm"
             name={currentUser.email}
-            src={(userData as UserData).profileAvatar}
+            src={(userData as UserData)?.profileAvatar}
           />
           <Text
             display={{ base: "none", lg: "block" }}

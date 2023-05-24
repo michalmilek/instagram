@@ -127,11 +127,15 @@ const InstagramPost = ({ post }: { post: Post }) => {
         align="center"
         p={4}>
         <Avatar
+          cursor="pointer"
+          onClick={() => router.push(`/profile/${post.user.uid}`)}
           size={{ base: "sm", lg: "md" }}
           name={post.user.username}
           src={post.user.profileAvatar}
         />
         <Text
+          cursor="pointer"
+          onClick={() => router.push(`/profile/${post.user.uid}`)}
           fontSize={{ base: "sm", lg: "md" }}
           ml={2}
           fontWeight="bold">

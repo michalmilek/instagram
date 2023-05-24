@@ -15,7 +15,13 @@ import {
   Timestamp,
   where,
 } from "@firebase/firestore";
-import { Comment, Post, PostWithUserReference, UserData } from "@/types";
+import {
+  Comment,
+  Notification,
+  Post,
+  PostWithUserReference,
+  UserData,
+} from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
 export const getUserByUID = async (uid: string): Promise<UserData | null> => {
@@ -147,11 +153,44 @@ export const addLike = async (postId: string, userId: string) => {
   };
 
   await setDoc(likeDocRef, likeData);
+
+  //adding doc to "notifications" collection
+  const notificationsCollectionRef = collection(db, "notifications");
+  const userRef = doc(db, "users", userId);
+
+  const notificationData = {
+    postId: postRef,
+    userId: userRef,
+    seen: false,
+    timestamp: serverTimestamp(),
+  };
+
+  await addDoc(notificationsCollectionRef, notificationData);
 };
 
 export const removeLike = async (postId: string, userId: string) => {
   const likeDocRef = doc(db, "posts", postId, "likes", userId);
   await deleteDoc(likeDocRef);
+
+  const userRef = doc(db, "users", userId);
+  const postRef = doc(db, "posts", postId);
+
+  const userSnapshot = await getDoc(userRef);
+  const userData = userSnapshot.data() as UserData;
+  const postSnapshot = await getDoc(postRef);
+  const postData = postSnapshot.data() as Post;
+
+  const notificationsCollectionRef = collection(db, "notifications");
+  const notificationsQuery = query(
+    notificationsCollectionRef,
+    where("userId", "==", userRef),
+    where("postId", "==", postRef)
+  );
+
+  const notificationsSnapshot = await getDocs(notificationsQuery);
+  notificationsSnapshot.forEach((doc) => {
+    deleteDoc(doc.ref);
+  });
 };
 
 export const getLikesCount = async (postId: string) => {
@@ -223,4 +262,22 @@ export const usePostById = (postId: string) => {
   return useQuery<Post | null, Error>(["post", postId], () =>
     getPostById(postId)
   );
+};
+
+export const getNotificationsByUserId = async (userId: string) => {
+  const notificationsCollectionRef = collection(db, "notifications");
+  const notificationsQuery = query(
+    notificationsCollectionRef,
+    where("userId", "==", userId)
+  );
+
+  const notificationsSnapshot = await getDocs(notificationsQuery);
+  const notifications: Notification[] = [];
+
+  notificationsSnapshot.forEach((doc) => {
+    const notification = doc.data() as Notification;
+    notifications.push(notification);
+  });
+
+  return notifications;
 };

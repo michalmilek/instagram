@@ -65,6 +65,7 @@ export default function Home() {
 
   if (!currentUser) {
     router.push("/login");
+    window.location.href = window.location.href + "/login";
 
     return <div>User not logged in</div>;
   }
