@@ -13,6 +13,7 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  updateDoc,
   where,
 } from "@firebase/firestore";
 import {
@@ -23,6 +24,7 @@ import {
   UserData,
 } from "@/types";
 import { useQuery } from "@tanstack/react-query";
+import { User } from "firebase/auth";
 
 export const getUserByUID = async (uid: string): Promise<UserData | null> => {
   const userDocRef = doc(collection(db, "users"), uid);
@@ -145,27 +147,40 @@ export const useComments = (postId: string) => {
 
 export const addLike = async (postId: string, userId: string) => {
   const postRef = doc(db, "posts", postId);
-  const likesCollectionRef = collection(postRef, "likes");
+  const postSnapshot = await getDoc(postRef);
+  const postData = postSnapshot.data() as PostWithUserReference;
+  const postUserRef = postData.user as DocumentReference;
+  const postUserDataSnapshot = await getDoc(postUserRef);
 
-  const likeDocRef = doc(likesCollectionRef, userId);
-  const likeData = {
-    timestamp: serverTimestamp(),
-  };
+  if (postUserDataSnapshot.exists()) {
+    const postUserData = postUserDataSnapshot.data() as UserData;
 
-  await setDoc(likeDocRef, likeData);
+    const likesCollectionRef = collection(postRef, "likes");
 
-  //adding doc to "notifications" collection
-  const notificationsCollectionRef = collection(db, "notifications");
-  const userRef = doc(db, "users", userId);
+    const likeDocRef = doc(likesCollectionRef, userId);
+    const likeData = {
+      timestamp: serverTimestamp(),
+    };
 
-  const notificationData = {
-    postId: postRef,
-    userId: userRef,
-    seen: false,
-    timestamp: serverTimestamp(),
-  };
+    await setDoc(likeDocRef, likeData);
 
-  await addDoc(notificationsCollectionRef, notificationData);
+    // Dodawanie dokumentu do kolekcji "notifications"
+    const notificationsCollectionRef = collection(db, "notifications");
+    const userRef = doc(db, "users", userId);
+    const notificationDocRef = doc(notificationsCollectionRef);
+    const notificationData = {
+      id: notificationDocRef.id,
+      author: postUserData.uid,
+      postId: postRef,
+      userId: userRef,
+      seen: false,
+      timestamp: serverTimestamp(),
+    };
+
+    await setDoc(notificationDocRef, notificationData);
+  } else {
+    console.log("Dokument użytkownika nie istnieje");
+  }
 };
 
 export const removeLike = async (postId: string, userId: string) => {
@@ -264,8 +279,6 @@ export const usePostById = (postId: string) => {
   );
 };
 
-
-
 export const getNotificationsByUserId = async (userId: string) => {
   const notificationsCollectionRef = collection(db, "notifications");
   const notificationsQuery = query(
@@ -282,4 +295,71 @@ export const getNotificationsByUserId = async (userId: string) => {
   });
 
   return notifications;
+};
+
+export const getNotificationByAuthor = async (authorId: string) => {
+  const notificationsCollectionRef = collection(db, "notifications");
+  const querySnapshot = await getDocs(notificationsCollectionRef);
+
+  const matchingNotifications = [];
+
+  for (const notificationDoc of querySnapshot.docs) {
+    const notificationData = notificationDoc.data();
+
+    if (notificationData.author === authorId) {
+      const postIdPath = notificationData.postId.path;
+      const userIdPath = notificationData.userId.path;
+
+      const postIdRef = doc(db, postIdPath);
+      console.log("🚀 ~ postIdRef:", postIdRef);
+      const userIdRef = doc(db, userIdPath);
+      console.log("🚀 ~ userIdRef:", userIdRef);
+
+      const [postSnapshot, userSnapshot] = await Promise.all([
+        getDoc(postIdRef),
+        getDoc(userIdRef),
+      ]);
+
+      const post = postSnapshot.data();
+      const user = userSnapshot.data();
+
+      const notification = {
+        ...notificationData,
+        postId: post,
+        userId: user,
+      };
+
+      matchingNotifications.push(notification);
+    }
+  }
+
+  return matchingNotifications;
+};
+
+export const useNotificationsByAuthor = (authorId: string) => {
+  return useQuery(["notifications", authorId], () =>
+    getNotificationByAuthor(authorId)
+  );
+};
+
+export const markNotificationAsSeen = async (notificationId: string) => {
+  const notificationRef = doc(db, "notifications", notificationId);
+  const notificationSnapshot = await getDoc(notificationRef);
+
+  if (notificationSnapshot.exists()) {
+    await updateDoc(notificationRef, { seen: true });
+  } else {
+  }
+};
+
+export const markNotificationAsUnseen = async (notificationId: string) => {
+  const notificationRef = doc(db, "notifications", notificationId);
+  const notificationSnapshot = await getDoc(notificationRef);
+
+  if (notificationSnapshot.exists()) {
+    await updateDoc(notificationRef, { seen: false });
+    console.log("Status notyfikacji został zaktualizowany.");
+  } else {
+    console.log("Notyfikacja o podanym ID nie istnieje.");
+  }
 };

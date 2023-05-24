@@ -25,7 +25,6 @@ import { AuthContext } from "@/firebase/AuthContext";
 
 type RegisterFormData = {
   email: string;
-  username: string;
   password: string;
   confirmPassword: string;
   acceptTerms: boolean;
@@ -36,7 +35,6 @@ const schema = yup.object().shape({
     .string()
     .required("Email is required")
     .email("Invalid email address"),
-  username: yup.string().required("Username is required"),
   password: yup
     .string()
     .required("Password is required")
@@ -110,15 +108,6 @@ const Register = () => {
               {...register("email")}
             />
             <Text color="red.500">{errors.email?.message}</Text>
-          </FormControl>
-          <FormControl isInvalid={!!errors.username?.message}>
-            <FormLabel>Username</FormLabel>
-            <Input
-              type="text"
-              placeholder="Username"
-              {...register("username")}
-            />
-            <Text color="red.500">{errors.username?.message}</Text>
           </FormControl>
           <FormControl isInvalid={!!errors.password?.message}>
             <FormLabel>Password</FormLabel>

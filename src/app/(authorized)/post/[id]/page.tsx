@@ -5,7 +5,7 @@ import { Post as PostInterface } from "@/types";
 import { Spinner } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import React from "react";
-import Post from "../../../components/Post";
+import Post from "../../../../components/Post";
 
 const Page = () => {
   const { id } = useParams();
