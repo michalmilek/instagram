@@ -358,8 +358,38 @@ export const markNotificationAsUnseen = async (notificationId: string) => {
 
   if (notificationSnapshot.exists()) {
     await updateDoc(notificationRef, { seen: false });
-    console.log("Status notyfikacji został zaktualizowany.");
+    console.log("Notification status has been updated.");
   } else {
-    console.log("Notyfikacja o podanym ID nie istnieje.");
+    console.log("Notification with provided ID doesnt exist.");
+  }
+};
+
+export const updateUserProfileAvatar = async (
+  userId: string,
+  newProfileAvatar: string
+): Promise<void> => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      profileAvatar: newProfileAvatar,
+    });
+    console.log("User profile avatar updated successfully.");
+  } catch (error) {
+    console.error("Error updating user profile avatar:", error);
+  }
+};
+
+export const updateUserProfileUsername = async (
+  userId: string,
+  newUsername: string
+): Promise<void> => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      username: newUsername,
+    });
+    console.log("User profile username updated successfully.");
+  } catch (error) {
+    console.error("Error updating user profile username:", error);
   }
 };

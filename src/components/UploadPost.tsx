@@ -7,6 +7,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Image,
   Input,
   Modal,
   ModalBody,
@@ -22,7 +23,12 @@ import { object, string } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import UploadFile from "@/services/UploadFile";
 import { storage, db } from "../firebase/firebaseConfig";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  deleteObject,
+} from "firebase/storage";
 import * as Yup from "yup";
 import {
   addDoc,
@@ -35,6 +41,7 @@ import { AuthContext } from "@/firebase/AuthContext";
 import { getAllPosts, getUserByUID } from "@/services/firebaseMethods";
 import { useQuery } from "@tanstack/react-query";
 import { UserData } from "@/types";
+import { v4 as uuidv4 } from "uuid";
 
 interface FormData {
   description: string;
@@ -68,12 +75,45 @@ const UploadPost = ({
 
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [previewURL, setPreviewURL] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const uploadedFile = event.target.files[0];
+      const generatedFileName = `${uuidv4()}_${uploadedFile.name}`;
       setFile(uploadedFile);
+      setFileName(generatedFileName);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.readyState === 2) {
+          setPreviewURL(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(uploadedFile);
     }
+  };
+
+  const handleCancel = () => {
+    if (file && fileName) {
+      // Delete the file from storage
+      const storageRef = ref(storage);
+      const fileRef = ref(storageRef, fileName);
+      deleteObject(fileRef)
+        .then(() => {
+          console.log("File deleted from storage.");
+        })
+        .catch((error) => {
+          console.error("Error deleting file from storage:", error);
+        });
+    }
+
+    setFile(null);
+    setPreviewURL(null);
+    setFileName(null);
+    onClose();
+    reset({ description: "" });
   };
 
   const {
@@ -96,9 +136,9 @@ const UploadPost = ({
       // Process form data, e.g., send it to an API, etc.
       console.log(data);
 
-      if (file) {
+      if (file && fileName) {
         const storageRef = ref(storage);
-        const fileRef = ref(storageRef, file.name);
+        const fileRef = ref(storageRef, fileName);
         const userRef = doc(db, "users", currentUser.uid); // Referencja do dokumentu "users/user-id"
 
         await uploadBytes(fileRef, file);
@@ -138,7 +178,7 @@ const UploadPost = ({
       </Button>
       <Modal
         isOpen={isOpen}
-        onClose={onClose}>
+        onClose={handleCancel}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Add Post</ModalHeader>
@@ -159,6 +199,16 @@ const UploadPost = ({
                 </FormControl>
               </Box>
 
+              {previewURL && (
+                <Box mb={4}>
+                  <Image
+                    src={previewURL}
+                    alt="Preview"
+                    width="200"
+                  />
+                </Box>
+              )}
+
               <Box mb={4}>
                 <FormControl isInvalid={!!errors.image}>
                   <FormLabel>Image</FormLabel>
@@ -175,11 +225,12 @@ const UploadPost = ({
                   type="submit"
                   colorScheme="blue"
                   isLoading={uploading}
-                  mr={3}>
+                  mr={3}
+                  isDisabled={!file}>
                   {uploading ? "Uploading..." : "Add"}
                 </Button>
                 <Button
-                  onClick={onClose}
+                  onClick={handleCancel}
                   disabled={uploading}>
                   Cancel
                 </Button>

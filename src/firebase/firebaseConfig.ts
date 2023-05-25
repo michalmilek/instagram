@@ -26,7 +26,6 @@ const auth = getAuth();
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// try to add analytics
 const analytics =
   app.name && typeof window !== "undefined" ? getAnalytics(app) : null;
 

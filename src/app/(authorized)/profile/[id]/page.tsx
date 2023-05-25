@@ -14,12 +14,18 @@ import UserProfile from "@/components/UserProfile";
 const Page = () => {
   const { id } = useParams();
 
+
   const { data: posts, isLoading, isError, error } = useAllPostsByUserId(id);
   const {
     data: userData,
     isLoading: userIsLoading,
     isError: userIsError,
+    refetch: refetchProfile,
   } = useUserByUID(id);
+
+  const handleRefetchProfile = () => {
+    refetchProfile();
+  };
 
   const sidebarWidth = useBreakpointValue({
     base: "70px",
@@ -44,6 +50,7 @@ const Page = () => {
       marginLeft={sidebarWidth}
       alignItems="center">
       <UserProfile
+        handleRefetchProfile={handleRefetchProfile}
         userData={userData}
         postLength={posts.length || 0}
       />
