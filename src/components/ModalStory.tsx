@@ -2,18 +2,15 @@
 
 import { useState } from "react";
 import { Modal, ModalOverlay, ModalContent, ModalBody } from "@chakra-ui/react";
+import ReactPlayer from "react-player/youtube";
 
-const StoryModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface Props {
+  handleCloseModal: () => void;
+  isOpen: boolean;
+  handleOpenModal: () => void;
+}
 
-  const handleOpenModal = () => {
-    setIsOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsOpen(false);
-  };
-
+const StoryModal = ({ handleCloseModal, handleOpenModal, isOpen }: Props) => {
   const getRandomVideoId = () => {
     // Losowy identyfikator wideo z YouTube
     const videoIds = ["video1", "video2", "video3"];
@@ -25,7 +22,6 @@ const StoryModal = () => {
 
   return (
     <>
-      <button onClick={handleOpenModal}>Otwórz modal</button>
       <Modal
         isOpen={isOpen}
         onClose={handleCloseModal}
@@ -33,11 +29,10 @@ const StoryModal = () => {
         <ModalOverlay />
         <ModalContent>
           <ModalBody>
-            <video
-              src={`https://www.youtube.com/embed/${videoId}`}
-              width="100%"
-              height="auto"
+            <ReactPlayer
+              width={"100%"}
               controls
+              url={`https://www.youtube.com/watch?v=DovVDv59Y7M`}
             />
           </ModalBody>
         </ModalContent>

@@ -1,8 +1,20 @@
 "use client";
-import React, { useRef } from "react";
-import { Box, Flex, Avatar, Text, useBreakpointValue } from "@chakra-ui/react";
+import React, { useContext, useRef, useState } from "react";
+import {
+  Box,
+  Flex,
+  Avatar,
+  Text,
+  useBreakpointValue,
+  IconButton,
+} from "@chakra-ui/react";
 import { faker } from "@faker-js/faker";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
+import StoryModal from "./ModalStory";
+import { useUserByUID } from "@/services/firebaseMethods";
+import { AuthContext } from "@/firebase/AuthContext";
+import { AiOutlinePlus } from "react-icons/ai";
+import UploadStory from "./UploadStory";
 
 interface Story {
   username: string;
@@ -20,8 +32,19 @@ const generateRandomStories = (count: number): Story[] => {
 };
 
 const StoriesCarousel: React.FC = () => {
+  //@ts-ignore
+  const { currentUser } = useContext(AuthContext);
   const stories = generateRandomStories(30);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+  };
 
   const scrollLeft = () => {
     if (carouselRef.current) {
@@ -47,6 +70,8 @@ const StoriesCarousel: React.FC = () => {
     lg: "600px",
     xl: "800px",
   });
+
+  const { data: currentUserData } = useUserByUID(currentUser.uid);
 
   return (
     <Box position="relative">
@@ -98,8 +123,35 @@ const StoriesCarousel: React.FC = () => {
         display="flex"
         overflowX="auto"
         whiteSpace="nowrap">
+        <Flex
+          zIndex={0}
+          display="flex"
+          direction="column"
+          align="center"
+          justify="center"
+          px={2}>
+          <div className="w-18 h-18 rounded-full relative border-2 border-blue-400">
+            <Avatar
+              className="relative hover:scale-110 transition-all cursor-pointer"
+              size={{ base: "sm", lg: "lg" }}
+              name={currentUserData?.username}
+              src={currentUserData?.profileAvatar}
+            />
+            <UploadStory />
+          </div>
+          <Text
+            className="select-none cursor-text"
+            maxW={{ base: "30px", lg: "80px" }}
+            isTruncated
+            mt={2}
+            fontSize="xs"
+            fontWeight="light">
+            {currentUserData?.username}
+          </Text>
+        </Flex>
         {stories.map((story, index) => (
           <Flex
+            onClick={handleOpenModal}
             zIndex={0}
             key={index}
             display="flex"
@@ -127,6 +179,11 @@ const StoriesCarousel: React.FC = () => {
           </Flex>
         ))}
       </Box>
+      <StoryModal
+        isOpen={isOpen}
+        handleOpenModal={handleOpenModal}
+        handleCloseModal={handleCloseModal}
+      />
     </Box>
   );
 };
