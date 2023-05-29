@@ -59,7 +59,7 @@ const Sidebar = () => {
   const boxRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isNotificationOpen, setIsNotifcationOpen] = useState(false);
-
+  
   if (!currentUser) {
     return router.push("/login");
   }
@@ -75,8 +75,6 @@ const Sidebar = () => {
     error,
     refetch: refetchNotifications,
   } = useNotificationsByAuthor(currentUser.uid);
-
-  console.log(notifications);
 
   const sidebarButtons: SidebarButton[] = [
     { label: "Home", icon: FiHome, onClick: () => router.push("/") },
@@ -224,9 +222,10 @@ const Sidebar = () => {
       )}
       <Button
         aria-label="More"
-        mt="auto"
+        mt="36"
         size="lg"
         justifyContent="flex-start"
+        alignSelf={"flex-end"}
         leftIcon={<FiMoreHorizontal size="30" />}
         variant="ghost"
         w="100%">

@@ -311,9 +311,7 @@ export const getNotificationByAuthor = async (authorId: string) => {
       const userIdPath = notificationData.userId.path;
 
       const postIdRef = doc(db, postIdPath);
-      console.log("🚀 ~ postIdRef:", postIdRef);
       const userIdRef = doc(db, userIdPath);
-      console.log("🚀 ~ userIdRef:", userIdRef);
 
       const [postSnapshot, userSnapshot] = await Promise.all([
         getDoc(postIdRef),
@@ -358,7 +356,6 @@ export const markNotificationAsUnseen = async (notificationId: string) => {
 
   if (notificationSnapshot.exists()) {
     await updateDoc(notificationRef, { seen: false });
-    console.log("Notification status has been updated.");
   } else {
     console.log("Notification with provided ID doesnt exist.");
   }
@@ -373,7 +370,6 @@ export const updateUserProfileAvatar = async (
     await updateDoc(userRef, {
       profileAvatar: newProfileAvatar,
     });
-    console.log("User profile avatar updated successfully.");
   } catch (error) {
     console.error("Error updating user profile avatar:", error);
   }
@@ -388,8 +384,39 @@ export const updateUserProfileUsername = async (
     await updateDoc(userRef, {
       username: newUsername,
     });
-    console.log("User profile username updated successfully.");
   } catch (error) {
     console.error("Error updating user profile username:", error);
   }
+};
+
+export const getAllStories = async () => {
+  try {
+    const storiesCollection = collection(db, "stories");
+    const querySnapshot = await getDocs(storiesCollection);
+
+    const stories = [];
+    for (const docSnapshot of querySnapshot.docs) {
+      const story = docSnapshot.data();
+      const userIdRef = story.userId;
+
+      // Pobierz zawartość dokumentu z kolekcji "users"
+      const userIdDoc = await getDoc(userIdRef);
+      const user = userIdDoc.data();
+
+      // Zamień referencję userId na zawartość dokumentu
+      story.userId = user;
+
+      stories.push(story);
+    }
+
+    console.log("Wszystkie dokumenty z kolekcji 'stories':", stories);
+    return stories;
+  } catch (error) {
+    console.log("Błąd podczas pobierania dokumentów:", error);
+    return [];
+  }
+};
+
+export const useAllStories = () => {
+  return useQuery(["stories"], () => getAllStories());
 };

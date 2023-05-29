@@ -12,15 +12,26 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { AiOutlinePlus } from "react-icons/ai";
-import { storage } from "@/firebase/firebaseConfig";
+import { db, storage } from "@/firebase/firebaseConfig";
 import {
   ref,
   SettableMetadata,
   updateMetadata,
   uploadBytes,
+  getDownloadURL,
 } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  updateDoc,
+} from "@firebase/firestore";
+import { StoryData } from "@/types";
 
-function UploadStory() {
+function UploadStory({ uid }: { uid: string }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -36,8 +47,11 @@ function UploadStory() {
       const storageRef = ref(storage);
       const storiesRef = ref(storageRef, "stories");
 
+      // Generowanie unikatowej nazwy pliku za pomocą UUID
+      const fileName = `${uuidv4()}_${selectedFile.name}`;
+
       // Przesłanie pliku do Firebase Storage w folderze "stories"
-      const fileRef = ref(storiesRef, selectedFile.name);
+      const fileRef = ref(storiesRef, fileName);
       uploadBytes(fileRef, selectedFile)
         .then((snapshot) => {
           console.log("Plik został przesłany do Firebase Storage.");
@@ -45,22 +59,54 @@ function UploadStory() {
           // Ustawienie limitu czasu na 24 godziny
           const expirationDate = new Date();
           expirationDate.setHours(expirationDate.getHours() + 24);
-          const metadata: SettableMetadata = {
-            customMetadata: {
-              timeCreated: expirationDate.getTime().toString(),
-            },
-          };
 
-          // Ustawienie metadanych pliku
-          updateMetadata(fileRef, metadata)
-            .then(() => {
-              console.log("Metadane pliku zostały zaktualizowane.");
+          let storyId: string | undefined; // Zmienna do przechowywania storyId
 
-              onClose();
+          // Utworzenie dokumentu w kolekcji "stories" z linkiem do pliku
+          getDownloadURL(fileRef)
+            .then((fileUrl) => {
+              const storyData = {
+                fileUrl: fileUrl,
+                expirationDate: serverTimestamp(),
+                userId: doc(db, "users", uid), // Dodanie referencji do dokumentu z kolekcji "users"
+              };
+
+              addDoc(collection(db, "stories"), storyData)
+                .then((docRef) => {
+                  console.log("Dokument został dodany do kolekcji 'stories'.");
+                  storyId = docRef.id; // Przypisanie ID dokumentu do zmiennej storyId
+
+                  // Zaktualizuj dokument, aby zawierał pole storyId
+                  const updatedData = { ...storyData, storyId: docRef.id };
+                  return updateDoc(doc(db, "stories", docRef.id), updatedData);
+                })
+                .then(() => {
+                  console.log("Dokument został zaktualizowany.");
+                  onClose();
+                })
+                .catch((error) => {
+                  console.log("Błąd podczas dodawania dokumentu:", error);
+                });
             })
             .catch((error) => {
-              console.log("Błąd podczas ustawiania metadanych pliku:", error);
+              console.log(
+                "Błąd podczas pobierania URL do pobrania pliku:",
+                error
+              );
             });
+
+          // Ustawienie czasu wygaśnięcia dla dokumentu po 24 godzinach
+          setTimeout(() => {
+            if (storyId) {
+              deleteDoc(doc(db, "stories", storyId))
+                .then(() => {
+                  console.log("Dokument został usunięty po 24 godzinach.");
+                })
+                .catch((error) => {
+                  console.log("Błąd podczas usuwania dokumentu:", error);
+                });
+            }
+          }, 24 * 60 * 60 * 1000); // 24 godziny w milisekundach
         })
         .catch((error) => {
           console.log(
@@ -86,7 +132,7 @@ function UploadStory() {
         onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Wyślij video</ModalHeader>
+          <ModalHeader>Upload video</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <input
@@ -98,13 +144,14 @@ function UploadStory() {
 
           <ModalFooter>
             <Button
+              className="bg-blue-500"
               colorScheme="blue"
               mr={3}
               onClick={handleUpload}
               isDisabled={!selectedFile}>
-              Wyślij
+              Upload
             </Button>
-            <Button onClick={onClose}>Anuluj</Button>
+            <Button onClick={onClose}>Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

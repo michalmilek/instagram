@@ -11,7 +11,7 @@ import {
 import { faker } from "@faker-js/faker";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import StoryModal from "./ModalStory";
-import { useUserByUID } from "@/services/firebaseMethods";
+import { useAllStories, useUserByUID } from "@/services/firebaseMethods";
 import { AuthContext } from "@/firebase/AuthContext";
 import { AiOutlinePlus } from "react-icons/ai";
 import UploadStory from "./UploadStory";
@@ -72,6 +72,7 @@ const StoriesCarousel: React.FC = () => {
   });
 
   const { data: currentUserData } = useUserByUID(currentUser.uid);
+  const { data: allStories } = useAllStories();
 
   return (
     <Box position="relative">
@@ -137,7 +138,7 @@ const StoriesCarousel: React.FC = () => {
               name={currentUserData?.username}
               src={currentUserData?.profileAvatar}
             />
-            <UploadStory />
+            <UploadStory uid={currentUser.uid} />
           </div>
           <Text
             className="select-none cursor-text"
@@ -149,6 +150,41 @@ const StoriesCarousel: React.FC = () => {
             {currentUserData?.username}
           </Text>
         </Flex>
+        {allStories?.map((story) => (
+          <Flex
+            onClick={handleOpenModal}
+            zIndex={0}
+            key={story.storyId}
+            display="flex"
+            direction="column"
+            align="center"
+            justify="center"
+            px={2}>
+            <div className="w-18 h-18 rounded-full  relative border-2 border-blue-400">
+              <Avatar
+                className="relative hover:scale-110 transition-all cursor-pointer"
+                size={{ base: "sm", lg: "lg" }}
+                name={story.userId.username}
+                src={story.userId.profileAvatar}
+              />
+            </div>
+            <Text
+              className="select-none cursor-text"
+              maxW={{ base: "30px", lg: "80px" }}
+              isTruncated
+              mt={2}
+              fontSize="xs"
+              fontWeight="light">
+              {story.userId.username}
+            </Text>
+            <StoryModal
+              videoLink={story.fileUrl}
+              isOpen={isOpen}
+              handleOpenModal={handleOpenModal}
+              handleCloseModal={handleCloseModal}
+            />
+          </Flex>
+        ))}
         {stories.map((story, index) => (
           <Flex
             onClick={handleOpenModal}
@@ -176,14 +212,14 @@ const StoriesCarousel: React.FC = () => {
               fontWeight="light">
               {story.username}
             </Text>
+            <StoryModal
+              isOpen={isOpen}
+              handleOpenModal={handleOpenModal}
+              handleCloseModal={handleCloseModal}
+            />
           </Flex>
         ))}
       </Box>
-      <StoryModal
-        isOpen={isOpen}
-        handleOpenModal={handleOpenModal}
-        handleCloseModal={handleCloseModal}
-      />
     </Box>
   );
 };

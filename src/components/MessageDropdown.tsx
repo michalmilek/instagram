@@ -12,6 +12,7 @@ import {
   IconButton,
   Avatar,
   Icon,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { Notification, NotificationData, NotificationData2 } from "@/types";
 import { useRouter } from "next/navigation";
@@ -51,6 +52,11 @@ const MessageDropdown = ({
 }) => {
   const router = useRouter();
 
+  const showText = useBreakpointValue(
+    { base: false, lg: true },
+    { ssr: false }
+  );
+
   const filteredNotifications = notifications?.filter(
     (notification: any) => notification.seen === false
   );
@@ -64,9 +70,10 @@ const MessageDropdown = ({
             variant="ghost"
             pr={9}
             isActive={isOpen}
+            justifyContent="flex-start"
             as={Button}
             leftIcon={<FiHeart size={"20"} />}>
-            Notifications
+            {showText && "Notifications"}
             <Badge
               fontSize="md"
               position="absolute"

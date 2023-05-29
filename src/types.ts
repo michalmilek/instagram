@@ -133,3 +133,11 @@ export interface NotificationData2 {
     username: string;
   };
 }
+
+
+export interface StoryData {
+  fileUrl: string;
+  expirationDate: any;
+  userId: any;
+  storyId: string;
+}
