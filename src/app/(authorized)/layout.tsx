@@ -2,6 +2,7 @@ import "../globals.css";
 import { Inter } from "next/font/google";
 import { Providers } from "../providers";
 import Sidebar from "@/components/Sidebar";
+import ProtectedPage from "@/components/ProtectedPage";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +20,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            <Sidebar />
-            {children}
-          </main>
+          <ProtectedPage>
+            <main className="flex min-h-screen flex-col items-center justify-between p-24">
+              <Sidebar />
+              {children}
+            </main>
+          </ProtectedPage>
         </Providers>
       </body>
     </html>

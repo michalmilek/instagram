@@ -54,10 +54,6 @@ const Register = () => {
 
   const router = useRouter();
 
-  if (currentUser) {
-    router.push("/");
-  }
-
   const {
     handleSubmit,
     register,

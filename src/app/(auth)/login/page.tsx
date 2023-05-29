@@ -16,10 +16,6 @@ const LoginPage = () => {
 
   const router = useRouter();
 
-  if (currentUser) {
-    router.push("/");
-  }
-
   const handleLoginWithGoogle = async () => {
     try {
       await googleSignIn().then(() => router.push("/"));

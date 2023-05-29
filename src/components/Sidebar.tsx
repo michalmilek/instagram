@@ -59,10 +59,6 @@ const Sidebar = () => {
   const boxRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isNotificationOpen, setIsNotifcationOpen] = useState(false);
-  
-  if (!currentUser) {
-    return router.push("/login");
-  }
 
   const handleIsNotificationOpen = (value: boolean) => {
     setIsNotifcationOpen(value);

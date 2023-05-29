@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllPosts } from "@/services/firebaseMethods";
 import { Post as PostInterface } from "@/types";
 import PostModal from "@/components/PostModal";
+import ProtectedPage from "@/components/ProtectedPage";
 
 interface User {
   uid: string;
@@ -30,13 +31,7 @@ export default function Home() {
   const { currentUser } = useContext(AuthContext);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  if (!currentUser) {
-    router.push("/login");
-    window.location.href = window.location.href + "/login";
 
-    return <div>User not logged in</div>;
-  }
   const sidebarWidth = useBreakpointValue({
     base: "70px",
     md: "80px",
@@ -68,7 +63,6 @@ export default function Home() {
   const closeModal = () => {
     setIsModalOpen(false);
   };
-
 
   const usersRef = collection(db, "users");
   async function checkIfUserExists(uid: string): Promise<boolean> {
