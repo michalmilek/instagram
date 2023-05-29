@@ -35,7 +35,11 @@ const Page = () => {
   });
 
   if (isLoading) {
-    return <Spinner size="lg" />;
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <Spinner size="lg" />;
+      </div>
+    );
   }
 
   if (isError) {

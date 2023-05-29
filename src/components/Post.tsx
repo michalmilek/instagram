@@ -96,12 +96,10 @@ const InstagramPost = ({ post }: { post: Post }) => {
     isError,
   } = useQuery(["user", currentUser.uid], () => getUserByUID(currentUser.uid));
 
-  const {
-    data: commentsData,
-    isLoading: isLoadingComments,
-    isError: isErrorComments,
-    refetch: refetchComments,
-  } = useQuery(["comments", post.id], () => getAllComments(post.id));
+  const { data: commentsData, refetch: refetchComments } = useQuery(
+    ["comments", post.id],
+    () => getAllComments(post.id)
+  );
 
   const { data: isLiked, refetch: refetchisLiked } = useIsUserLikedPost(
     post.id,

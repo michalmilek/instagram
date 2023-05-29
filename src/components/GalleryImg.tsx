@@ -43,12 +43,7 @@ const GalleryImg = ({ post }: { post: Post }) => {
     window.history.pushState(null, "", newUrl);
   };
 
-  const {
-    data: commentsData,
-    isLoading: isLoadingComments,
-    isError: isErrorComments,
-    refetch: refetchComments,
-  } = useComments(post.id);
+  const { data: commentsData, refetch: refetchComments } = useComments(post.id);
 
   const { data: isLiked, refetch: refetchisLiked } = useIsUserLikedPost(
     post.id,

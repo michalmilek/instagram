@@ -18,7 +18,11 @@ const Page = () => {
   } = usePostById(id);
 
   if (isLoadingPost) {
-    return <Spinner size="lg" />;
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <Spinner size="lg" />;
+      </div>
+    );
   }
 
   if (isErrorPost) {

@@ -30,7 +30,13 @@ export default function Home() {
   const { currentUser } = useContext(AuthContext);
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  if (!currentUser) {
+    router.push("/login");
+    window.location.href = window.location.href + "/login";
 
+    return <div>User not logged in</div>;
+  }
   const sidebarWidth = useBreakpointValue({
     base: "70px",
     md: "80px",
@@ -63,12 +69,6 @@ export default function Home() {
     setIsModalOpen(false);
   };
 
-  if (!currentUser) {
-    router.push("/login");
-    window.location.href = window.location.href + "/login";
-
-    return <div>User not logged in</div>;
-  }
 
   const usersRef = collection(db, "users");
   async function checkIfUserExists(uid: string): Promise<boolean> {

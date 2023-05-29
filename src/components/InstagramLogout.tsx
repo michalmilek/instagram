@@ -11,6 +11,7 @@ import {
   Text,
   useToast,
   useBreakpointValue,
+  Spinner,
 } from "@chakra-ui/react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { faker } from "@faker-js/faker";
@@ -54,7 +55,7 @@ const InstagramLogout = ({
   } = useQuery(["user", currentUser.uid], () => getUserByUID(currentUser.uid));
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Spinner size="lg" />;
   }
 
   if (isError) {

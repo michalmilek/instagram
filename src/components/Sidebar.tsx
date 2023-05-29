@@ -68,13 +68,8 @@ const Sidebar = () => {
     setIsNotifcationOpen(value);
   };
 
-  const {
-    data: notifications,
-    isLoading,
-    isError,
-    error,
-    refetch: refetchNotifications,
-  } = useNotificationsByAuthor(currentUser.uid);
+  const { data: notifications, refetch: refetchNotifications } =
+    useNotificationsByAuthor(currentUser.uid);
 
   const sidebarButtons: SidebarButton[] = [
     { label: "Home", icon: FiHome, onClick: () => router.push("/") },

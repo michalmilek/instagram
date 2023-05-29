@@ -96,7 +96,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   if (loading) {
-    return <Spinner size="xl" />;
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <Spinner size="xl" />
+      </div>
+    );
   }
 
   return (

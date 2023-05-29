@@ -15,6 +15,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -123,7 +124,11 @@ const UploadPost = ({
   } = useQuery(["user", currentUser.uid], () => getUserByUID(currentUser.uid));
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="h-screen opacity-60 w-screen flex items-center justify-center">
+        <Spinner size="lg" />;
+      </div>
+    );
   }
 
   if (isError) {
